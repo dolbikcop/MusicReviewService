@@ -1,0 +1,14 @@
+from sqlalchemy.orm import Session
+
+from . import models, schemas
+
+
+def create_user(db: Session, user: schemas.UserCreate):
+    db_user = models.User()
+    db_user.email = user.email
+    db_user.username = user.username
+    db_user.hashed_password = user.password
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user

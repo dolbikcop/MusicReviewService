@@ -1,12 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
 
-from . import models
-from .database import SessionLocal, engine
+from . import schemas, crud
+from .database import SessionLocal, engine, Base
+from .music.routes import router as music_router
 
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
+app.include_router(music_router)
 
 # Dependency
 def get_db():
@@ -15,3 +17,11 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+@app.post("/users/", response_model=schemas.User)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    # db_user = crud.get_user_by_email(db, email=user.email)
+    # if db_user:
+    #     raise HTTPException(status_code=400, detail="Email already registered")
+    return crud.create_user(db=db, user=user)
