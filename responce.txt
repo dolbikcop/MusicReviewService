@@ -1,0 +1,3 @@
+https://passport.yandex.ru/auth?mode=auth&retpath=https://yandex.ru
+https://passport.yandex.ru/auth/finish?track_id=41d35d62a85f1a9a3c2671e7f93a33dccf
+https://sso.passport.yandex.ru/prepare?uuid=d031616a-9786-4075-b3c0-2fbebba715e2&goal=https%3A%2F%2Fya.ru%2F&finish=https%3A%2F%2Fyandex.ru

@@ -8,12 +8,14 @@ class User(Base):
     __tablename__ = "users"
 
     user_id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
+    username = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
     registered_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    items = relationship("Item", back_populates="owner")
+    reviews = relationship('Review', back_populates='owner')
+    comments = relationship('Comment', back_populates='owner')
 
 
 class Comment(Base):
@@ -26,7 +28,6 @@ class Comment(Base):
     review_id = Column(Integer, ForeignKey('reviews.review_id'))
 
     owner = relationship("User", back_populates="comments")
-    bind = relationship("Review", back_populates="comments")
 
 
 class Review(Base):
