@@ -20,32 +20,22 @@ class Content(BaseModel):
     id: Union[int, str]
 
 
-class SearchRequest(BaseModel):
+class SearchResponse(BaseModel):
     """
-        Схема, представляющая тело запроса на поиск.
+       Схема, представляющая результат поиска.
 
-        Attributes:
-            text(:obj:`str`): Текст запроса.
-            type(:obj:`ContentType`), optional: Желаемый тип искомых значений.
-            correct(:obj:`bool`), optional: Будет ли включено исправление в запросе.
-            page(:obj:`int`): Номер страницы запроса.
+       Attributes:
+           text(:obj:`str`): Текст запроса, исправленный. если correct = True.
+           type(:obj:`ContentType`), optional: Желаемый тип искомых значений.
+           correct(:obj:`bool`), optional: Была ли включено исправление в запросе.
+           page(:obj:`int`): Номер страницы запроса.
+           results(:obj:`list` из :obj:`Content`), optional: Результаты запроса.
     """
 
     text: str = ''
     type: Optional[ContentType] = None
     correct: Optional[bool] = True,
     page: int = 0
-
-
-class SearchResponse(SearchRequest):
-    """
-       Схема, представляющая результат поиска.
-
-       Attributes:
-           results(:obj:`list` из :obj:`Content`), optional: Результаты запроса.
-           message(:obj:`str`), optional: Комментарий к результату запроса.
-    """
-
-    results: Optional[List[Content]]
-    message: Optional[str]
+    results: Optional[List[Content]] = []
+    message: Optional[str] = ''
 

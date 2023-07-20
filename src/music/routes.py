@@ -1,16 +1,17 @@
 from typing import Union
 
 from fastapi import APIRouter
-from . import schemas
+
+from .schemas import SearchResponse
 
 router = APIRouter(prefix='/music', tags=['music'])
 
 
-@router.get('/search', response_model=schemas.SearchResponse)
-def search_music(request: schemas.SearchRequest):
-    pass
+@router.get('/search', response_model=SearchResponse)
+async def search_music(text: str):
+    return
 
 
 @router.get('/track')
-def get_track_by_id(id: Union[int, str]):
-    pass
+async def get_track_by_id(id: Union[int, str]):
+    return
