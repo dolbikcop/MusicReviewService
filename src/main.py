@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 
-from .music.routes import router as music_router
+from .music.auth import router as music_router
 from .auth.config import router as auth_router
 from .reviews.routes import router as review_router
 

@@ -3,6 +3,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from .enums import ReactionType
 from .models import Review, Comment
 
 
@@ -27,3 +28,6 @@ async def db_get_all_comments_of_review(db: AsyncSession, review_id: int):
     await db.commit()
     comments = await db.execute(select(Comment).where(Comment.review_id == review_id))
     return comments.scalars().all()
+
+async def db_add_reaction_to_review(db: AsyncSession, review_id: int, reaction_type: ReactionType):
+    pass
