@@ -13,8 +13,9 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     email: Mapped[str] = mapped_column(String(length=320), unique=True, index=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(length=1024), nullable=False)
 
-    reviews = relationship('Review', back_populates='owner', cascade='all, delete-orphan')
-    comments = relationship('Comment', back_populates='owner', cascade='all, delete-orphan')
+    reviews = relationship('Review', backref='owner', cascade='all, delete-orphan')
+    comments = relationship('Comment', backref='owner', cascade='all, delete-orphan')
 
-    review_reactions = relationship('ReviewReaction', back_populates='owner', cascade='all, delete-orphan')
-    comment_reactions = relationship('CommentReaction', back_populates='owner', cascade='all, delete-orphan')
+    review_reactions = relationship('ReviewReaction', backref='owner', cascade='all, delete-orphan')
+    comment_reactions = relationship('CommentReaction', backref='owner', cascade='all, delete-orphan')
+

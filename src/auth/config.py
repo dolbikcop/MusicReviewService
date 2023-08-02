@@ -5,7 +5,7 @@ from fastapi_users.authentication import AuthenticationBackend, CookieTransport,
 
 from .manager import get_user_manager
 from .models import User
-from .schemas import UserCreate, UserRead
+from .routes import router as register_router
 from ..config import REDIS_URL
 
 cookie_transport = CookieTransport(cookie_max_age=3600)
@@ -33,6 +33,6 @@ current_user = fastapi_users.current_user()
 
 router = APIRouter()
 router.include_router(fastapi_users.get_auth_router(auth_backend))
-router.include_router(fastapi_users.get_register_router(UserRead, UserCreate))
+router.include_router(register_router)
 
 

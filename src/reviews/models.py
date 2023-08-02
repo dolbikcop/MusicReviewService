@@ -22,9 +22,8 @@ class Review(Base):
     likes: Mapped[int] = mapped_column(Integer, default=0)
     dislikes: Mapped[int] = mapped_column(Integer, default=0)
 
-    owner = relationship('User', back_populates="reviews", lazy='subquery')
-    comments = relationship('Comment', collection_class=set, cascade='all, delete-orphan')
-    reactions = relationship('ReviewReaction', back_populates='review', cascade='all, delete-orphan')
+    comments = relationship('Comment', backref='review', cascade='all, delete-orphan')
+    reactions = relationship('ReviewReaction', backref='review')
 
 
 class Comment(Base):
@@ -38,34 +37,27 @@ class Comment(Base):
     likes: Mapped[int] = mapped_column(Integer, default=0)
     dislikes: Mapped[int] = mapped_column(Integer, default=0)
 
-    review_id: Mapped[int] = mapped_column(ForeignKey('review.id'))
+    review_id: Mapped[int] = mapped_column(ForeignKey('review.id'), nullable=False)
 
-    owner = relationship('User', back_populates="comments", lazy='subquery')
-    review = relationship('Review', foreign_keys=[review_id], back_populates='comments')
-    reactions = relationship('CommentReaction', back_populates='comment', cascade='all, delete-orphan')
+    reactions = relationship('CommentReaction', backref='comment')
 
 
 class ReviewReaction(Base):
     __tablename__ = 'review_reaction'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
-
     reaction_type: Mapped[int] = mapped_column(Enum(ReactionType), index=True)
-    review_id: Mapped[int] = mapped_column(ForeignKey(Comment.id), nullable=True)
 
-    review = relationship('Review', back_populates='reactions')
-    owner = relationship('User', back_populates='review_reactions')
+    user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
+    review_id: Mapped[int] = mapped_column(ForeignKey(Review.id), nullable=False)
 
 
 class CommentReaction(Base):
     __tablename__ = 'comment_reaction'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
-
     reaction_type: Mapped[int] = mapped_column(Enum(ReactionType), index=True)
-    comment_id: Mapped[int] = mapped_column(ForeignKey(Comment.id), nullable=True)
 
-    comment = relationship('Comment', back_populates='reactions')
-    owner = relationship('User', back_populates='comment_reactions')
+    user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
+    comment_id: Mapped[int] = mapped_column(ForeignKey(Comment.id), nullable=False)
+
