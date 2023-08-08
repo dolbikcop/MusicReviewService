@@ -43,5 +43,5 @@ async def spotify_auth(code: str,
     return response
 
 
-
-
+def get_auth_header(token: str):
+    return {'Authorization': f'Bearer {token}'}

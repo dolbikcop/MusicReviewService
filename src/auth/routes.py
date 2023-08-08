@@ -48,7 +48,7 @@ router = APIRouter()
 )
 async def register(
     request: Request,
-    user_create: UserCreate,  # type: ignore
+    user_create: UserCreate,
     user_manager: BaseUserManager = Depends(get_user_manager),
     session: AsyncSession = Depends(get_async_session)
 ):

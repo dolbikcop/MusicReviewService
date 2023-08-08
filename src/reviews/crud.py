@@ -42,10 +42,15 @@ async def db_add_review_reaction(db: AsyncSession, **kwargs: Any) -> ReviewReact
         raise DatabaseException()
 
 
-async def db_get_all_album_reviews(db: AsyncSession, album_id: int | str) -> List[Review] | None:
+async def db_get_album_reviews(db: AsyncSession, album_id: int | str,
+                                   limit: int, offset: int) -> List[Review] | None:
     try:
         await db.commit()
-        return await db.get(Review, {'album_id': album_id})
+        reviews = await db.execute(select(Review)
+                                   .where(Review.album_id == album_id)
+                                   .limit(limit)
+                                   .offset(offset))
+        return reviews.scalars().all()
     except SQLAlchemyError:
         raise DatabaseException()
 

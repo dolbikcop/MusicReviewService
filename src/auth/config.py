@@ -31,7 +31,7 @@ fastapi_users = FastAPIUsers[User, int](
 
 current_user = fastapi_users.current_user()
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["auth"])
 router.include_router(fastapi_users.get_auth_router(auth_backend))
 router.include_router(register_router)
 

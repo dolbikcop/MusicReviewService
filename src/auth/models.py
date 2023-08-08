@@ -1,5 +1,6 @@
+from datetime import datetime
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
-from sqlalchemy import Integer, String
+from sqlalchemy import Integer, String, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..database import Base
@@ -12,6 +13,7 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     username: Mapped[str] = mapped_column(String(length=100), unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String(length=320), unique=True, index=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(length=1024), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     reviews = relationship('Review', backref='owner', cascade='all, delete-orphan')
     comments = relationship('Comment', backref='owner', cascade='all, delete-orphan')

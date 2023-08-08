@@ -1,4 +1,5 @@
-from sqlalchemy import Integer, ForeignKey, String, Enum
+from datetime import datetime
+from sqlalchemy import Integer, ForeignKey, String, Enum, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .enums import ReactionType
@@ -14,6 +15,7 @@ class Review(Base):
     owner_id: Mapped[int] = mapped_column(ForeignKey('user.id'), index=True, nullable=False)
     album_id: Mapped[int] = mapped_column(String, nullable=False)
     grade: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     text: Mapped[str] = mapped_column(String(500), nullable=True)
     pros: Mapped[str] = mapped_column(String(250), nullable=True)
@@ -31,6 +33,7 @@ class Comment(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     owner_id: Mapped[int] = mapped_column(ForeignKey(User.id), index=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     text: Mapped[str] = mapped_column(String(500), nullable=False)
 

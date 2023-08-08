@@ -1,3 +1,4 @@
+import datetime
 from typing import Union, Optional, List
 
 from pydantic import BaseModel
@@ -21,6 +22,7 @@ class CommentRead(CommentCreate):
     owner_id: int
     likes: int
     dislikes: int
+    created_at: datetime.datetime
 
 
 class ReviewRead(ReviewCreate):
@@ -28,6 +30,7 @@ class ReviewRead(ReviewCreate):
     likes: int
     dislikes: int
     comments: List[CommentRead]
+    created_at: datetime.datetime
 
 
 class ReactionCreate(BaseModel):
