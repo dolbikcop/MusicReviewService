@@ -1,26 +1,22 @@
-from typing import Optional
+import requests
 
-from fastapi import Depends
-from fastapi_users import BaseUserManager, IntegerIDMixin, schemas, models, exceptions
-from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
-from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.requests import Request
-
-from .crud import db_get_user_with_name
+from src.ext import UnauthorizedException
 from .models import User
-from ..config import RESET_TOKEN, VERIFICATION_TOKEN
-from ..database import get_async_session
 
 
-async def get_user_db(session: AsyncSession = Depends(get_async_session)):
-    yield SQLAlchemyUserDatabase(session, User)
+def get_current_user(token: str) -> User:
+    url = 'https://api.spotify.com/v1/me'
+    header = get_auth_header(token)
+
+    response = requests.get(url, headers=header)
+    print(response.json())
+    if response.status_code == 401:
+        raise UnauthorizedException
+    json = response.json()
+    return User(id=json['id'], username=json['display_name'])
 
 
-class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
-    reset_password_token_secret = RESET_TOKEN
-    verification_token_secret = VERIFICATION_TOKEN
-
-
-
-async def get_user_manager(user_db=Depends(get_user_db)):
-    yield UserManager(user_db)
+def get_auth_header(token: str):
+    if token is None:
+        raise UnauthorizedException
+    return {'Authorization': f'Bearer {token}'}

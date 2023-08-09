@@ -12,7 +12,7 @@ class Review(Base):
     __tablename__ = 'review'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    owner_id: Mapped[int] = mapped_column(ForeignKey('user.id'), index=True, nullable=False)
+    owner_id: Mapped[str] = mapped_column(ForeignKey('user.id'), index=True, nullable=False)
     album_id: Mapped[int] = mapped_column(String, nullable=False)
     grade: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -32,7 +32,7 @@ class Comment(Base):
     __tablename__ = 'comment'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    owner_id: Mapped[int] = mapped_column(ForeignKey(User.id), index=True, nullable=False)
+    owner_id: Mapped[str] = mapped_column(ForeignKey(User.id), index=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     text: Mapped[str] = mapped_column(String(500), nullable=False)
@@ -51,7 +51,7 @@ class ReviewReaction(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     reaction_type: Mapped[int] = mapped_column(Enum(ReactionType), index=True)
 
-    user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
+    owner_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
     review_id: Mapped[int] = mapped_column(ForeignKey(Review.id), nullable=False)
 
 
@@ -61,6 +61,6 @@ class CommentReaction(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     reaction_type: Mapped[int] = mapped_column(Enum(ReactionType), index=True)
 
-    user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
+    owner_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
     comment_id: Mapped[int] = mapped_column(ForeignKey(Comment.id), nullable=False)
 

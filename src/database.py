@@ -17,6 +17,3 @@ async def get_async_session():
 
     async with async_session_maker() as session:
         yield session
-
-class DatabaseException(Exception):
-    pass

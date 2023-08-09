@@ -1,16 +1,14 @@
 import datetime
-from typing import Union, Optional, List
+from typing import Optional
 
-from pydantic import BaseModel
-
-from src.reviews.enums import ReactionType
+from pydantic import BaseModel, Field
 
 
 class ReviewCreate(BaseModel):
     text: str
-    grade: int
-    pros: Optional[str]
-    cons: Optional[str]
+    grade: int = Field(gt=0, le=5)
+    pros: Optional[str] = None
+    cons: Optional[str] = None
 
 
 class CommentCreate(BaseModel):
@@ -19,7 +17,7 @@ class CommentCreate(BaseModel):
 
 class CommentRead(CommentCreate):
     id: int
-    owner_id: int
+    owner_id: str
     likes: int
     dislikes: int
     created_at: datetime.datetime
@@ -27,12 +25,7 @@ class CommentRead(CommentCreate):
 
 class ReviewRead(ReviewCreate):
     id: int
+    owner_id: str
     likes: int
     dislikes: int
-    comments: List[CommentRead]
     created_at: datetime.datetime
-
-
-class ReactionCreate(BaseModel):
-    reaction_type: ReactionType
-    content_id: int

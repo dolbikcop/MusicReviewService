@@ -2,7 +2,6 @@ from enum import Enum
 
 
 class ReactionType(Enum):
-    none = 0
     like = 1
     dislike = 2
 

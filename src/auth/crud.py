@@ -1,17 +1,22 @@
-from fastapi import Depends
-from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.auth.models import User
-from src.database import DatabaseException, get_async_session
+from .models import User
+from ..ext import DatabaseException
 
 
-async def db_get_user_with_name(name: str, db: AsyncSession) -> User | None:
+async def db_get_user(db: AsyncSession, id: str) -> User | None:
     try:
-        user = await db.execute(select(User).where(User.username == name))
-        return user.scalar()
+        return await db.get(User, {'id': id})
     except SQLAlchemyError:
-        raise DatabaseException()
+        raise DatabaseException
 
 
+async def db_add_user(db: AsyncSession, user: User) -> User | None:
+    try:
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+        return user
+    except SQLAlchemyError:
+        raise DatabaseException
