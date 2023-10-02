@@ -1,5 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Integer, ForeignKey, String, Enum, DateTime, func
+from sqlalchemy.ext.declarative import AbstractConcreteBase
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .enums import ReactionType
@@ -45,22 +46,18 @@ class Comment(Base):
     reactions = relationship('CommentReaction', backref='comment')
 
 
-class ReviewReaction(Base):
+class Reaction(AbstractConcreteBase, Base):
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    reaction_type: Mapped[int] = mapped_column(Enum(ReactionType), index=True)
+
+    owner_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
+    item_id: Mapped[int] = mapped_column(ForeignKey(Review.id), nullable=False)
+
+
+class ReviewReaction(Reaction):
     __tablename__ = 'review_reaction'
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    reaction_type: Mapped[int] = mapped_column(Enum(ReactionType), index=True)
 
-    owner_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
-    review_id: Mapped[int] = mapped_column(ForeignKey(Review.id), nullable=False)
-
-
-class CommentReaction(Base):
+class CommentReaction(Reaction):
     __tablename__ = 'comment_reaction'
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    reaction_type: Mapped[int] = mapped_column(Enum(ReactionType), index=True)
-
-    owner_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
-    comment_id: Mapped[int] = mapped_column(ForeignKey(Comment.id), nullable=False)
-

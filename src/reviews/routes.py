@@ -1,26 +1,29 @@
-from typing import Union, Annotated
+from typing import Union
 
 from fastapi import APIRouter, Depends, Cookie
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
 
-from .crud import db_add_review, db_add_comment, db_get_review_by_id, \
-    db_get_all_comments_of_review, DatabaseException, db_get_album_reviews, \
-    db_add_review_reaction, db_get_comment_by_id, db_add_comment_reaction, db_get_most_popular_reviews
+from .crud import db_get_all_comments_of_review, db_get_album_reviews, db_get_most_popular_reviews
 from .enums import ReactionType
+from .repositories.comment import CommentRepository
+from .repositories.review import ReviewRepository
 from .schemas import ReviewCreate, CommentCreate, CommentRead, ReviewRead
 from ..auth.manager import get_auth_header, get_current_user
 from ..database import get_async_session
-from ..ext import UnauthorizedException, APIException
+from ..ext import UnauthorizedException, APIException, DatabaseException
 from ..spotify.service import get_album_info
 
 router = APIRouter()
+
+session = get_async_session()
+comment_rep = CommentRepository(session)
+review_rep = ReviewRepository(session)
 
 
 @router.post('/{album_id}/reviews', tags=['album', 'review'])
 async def add_review(album_id: Union[int, str],
                      review_scheme: ReviewCreate,
-                     db: AsyncSession = Depends(get_async_session),
                      spotify_token: Union[str | None] = Cookie(default=None)):
     try:
         header = get_auth_header(spotify_token)
@@ -28,7 +31,7 @@ async def add_review(album_id: Union[int, str],
             review = review_scheme.model_dump()
             review['album_id'] = album_id
             review['owner_id'] = get_current_user(spotify_token).id
-            review = await db_add_review(db, **review)
+            review = await review_rep.add(**review)
             return JSONResponse(f'Добавлено ревью: id - {review.id}', status_code=200)
     except DatabaseException:
         return JSONResponse('Упс, не удалось добавить рецензию', status_code=500)
@@ -64,16 +67,15 @@ async def get_album_reviews(album_id: str,
 @router.post('/{review_id}/comments', tags=['comment', 'review'])
 async def add_comment(review_id: int,
                       comment_scheme: CommentCreate,
-                      db: AsyncSession = Depends(get_async_session),
                       spotify_token: Union[str | None] = Cookie(default=None)):
-    review = await db_get_review_by_id(db, review_id)
+    review = await review_rep.get(review_id)
     if not review:
         return JSONResponse(status_code=404, content="Ревью не найдено")
     try:
         comment = comment_scheme.model_dump()
         comment['review_id'] = review.id
         comment['owner_id'] = get_current_user(spotify_token).id
-        comment = await db_add_comment(db, **comment)
+        comment = await comment_rep.add(**comment)
         return JSONResponse(status_code=200,
                             content=f"Добавлен комментарий для ревью {comment.review_id}: comment_id - {comment.id}")
     except DatabaseException:
@@ -85,16 +87,15 @@ async def add_comment(review_id: int,
 @router.post('/reviews/{review_id}/reaction', tags=['reaction', 'review'])
 async def add_or_remove_reaction_to_review(review_id: int,
                                            reaction_type: ReactionType,
-                                           db: AsyncSession = Depends(get_async_session),
                                            spotify_token: Union[str | None] = Cookie(default=None)):
-    review = await db_get_review_by_id(db, review_id)
+    review = await review_rep.get(review_id)
     if not review:
         return JSONResponse(status_code=404, content="Ревью не найдено")
     try:
         reaction = {'reaction_type': reaction_type,
                     'review_id': review.id,
                     'owner_id': get_current_user(spotify_token).id}
-        reaction = await db_add_review_reaction(db, **reaction)
+        reaction = await review_rep.add_reaction(**reaction)
         if reaction is not None:
             return JSONResponse(status_code=201,
                                 content=f"Добавлена реакция для ревью {reaction.review_id}: "
@@ -112,16 +113,15 @@ async def add_or_remove_reaction_to_review(review_id: int,
 @router.post('/comments/{comment_id}/reaction', tags=['comment', 'reaction'])
 async def add_or_remove_reaction_to_comment(comment_id: int,
                                             reaction_type: ReactionType,
-                                            db: AsyncSession = Depends(get_async_session),
                                             spotify_token: Union[str | None] = Cookie(default=None)):
-    comment = await db_get_comment_by_id(db, comment_id)
+    comment = await comment_rep.get(comment_id)
     if not comment:
         return JSONResponse(status_code=404, content="Комментарий не найден")
     try:
         reaction = {'reaction_type': reaction_type,
                     'comment_id': comment.id,
                     'owner_id': get_current_user(spotify_token).id}
-        reaction = await db_add_comment_reaction(db, **reaction)
+        reaction = await comment_rep.get_reaction(**reaction)
         if reaction is not None:
             return JSONResponse(status_code=201,
                                 content=f"Добавлена реакция для комментария {reaction.comment_id}: "
@@ -139,7 +139,7 @@ async def add_or_remove_reaction_to_comment(comment_id: int,
 @router.get('/{review_id}/comments', status_code=200, tags=['comment', 'review'])
 async def get_all_comments(review_id: int,
                            db: AsyncSession = Depends(get_async_session)):
-    review = await db_get_review_by_id(db, review_id)
+    review = await review_rep.get(review_id)
     if not review:
         return JSONResponse(status_code=404, content="Ревью не найдено")
     try:
